@@ -14,9 +14,12 @@ public class HexGrid : MonoBehaviour {
 
     HexCell[] cells;
 
+    HexMesh hexMesh;
+
     void Awake()
     {
         gridCanvas = GetComponentInChildren<Canvas>();
+        hexMesh = GetComponentInChildren<HexMesh>();
 
         cells = new HexCell[height * width];
 
@@ -29,10 +32,15 @@ public class HexGrid : MonoBehaviour {
         }
     }
 
+    private void Start()
+    {
+        hexMesh.Triangulate(cells);  
+    }
+
     void CreateCell(int x, int z, int i)
     {
         Vector3 position;
-        position.x = (x + z * 0.5f) * HexMetrics.innerRadius * 2f;
+        position.x = (x + z * 0.5f - z / 2) * HexMetrics.innerRadius * 2f;
         position.y = 0f;
         position.z = z * HexMetrics.outerRadius * 1.5f;
 
