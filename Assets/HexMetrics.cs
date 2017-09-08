@@ -5,6 +5,9 @@ public static class HexMetrics {
     public const float outerRadius = 10f;
     public const float innerRadius = 10f * 0.866025404f;
 
+    public const float solidFactor = 0.75f;
+    public const float blendFactor = 1f - solidFactor;
+
     static Vector3[] corners =
     {
         new Vector3(0f,0f,outerRadius),
