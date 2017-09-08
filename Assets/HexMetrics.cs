@@ -8,6 +8,8 @@ public static class HexMetrics {
     public const float solidFactor = 0.75f;
     public const float blendFactor = 1f - solidFactor;
 
+    public const float elevationStep = 3f;
+
     static Vector3[] corners =
     {
         new Vector3(0f,0f,outerRadius),
@@ -41,6 +43,6 @@ public static class HexMetrics {
     public static Vector3 GetBridge(HexDirection direction)
     {
         return (corners[(int)direction] + corners[((int)direction + 1) % 6]) *
-            0.5f * blendFactor;
+            blendFactor;
     }
 }
