@@ -39,7 +39,7 @@ public class HexGrid : MonoBehaviour {
         hexMesh.Triangulate(cells);  
     }
 
-    public void ColorCell(Vector3 position, Color color)
+    public HexCell GetCell(Vector3 position)
     {
         // get coordinates for clicked cell
         position = transform.InverseTransformPoint(position);
@@ -47,9 +47,11 @@ public class HexGrid : MonoBehaviour {
         // translate those coordinates into the index in the array of cells
         int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
         HexCell cell = cells[index];
-        // change that cell's color
-        cell.color = color;
-        // redraw the mesh with the new color for that hex
+        return cell;
+    }
+
+    public void Refresh()
+    {
         hexMesh.Triangulate(cells);
     }
 
