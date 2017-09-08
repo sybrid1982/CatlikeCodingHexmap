@@ -27,4 +27,14 @@ public static class HexMetrics {
     {
         return corners[((int)direction + 1) % 6];
     }
+
+    public static Vector3 GetFirstSolidCorner (HexDirection direction)
+    {
+        return corners[(int)direction] * solidFactor;
+    }
+
+    public static Vector3 GetSecondSolidCorner(HexDirection direction)
+    {
+        return corners[((int)direction + 1) % 6] * solidFactor;
+    }
 }
