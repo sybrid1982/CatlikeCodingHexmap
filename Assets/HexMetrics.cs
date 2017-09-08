@@ -15,6 +15,8 @@ public static class HexMetrics {
     public const float horizontalTerraceStepSize = 1f / terraceSteps;
     public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
 
+    public const int slopeLimit = 1;
+
     static Vector3[] corners =
     {
         new Vector3(0f,0f,outerRadius),
@@ -66,4 +68,18 @@ public static class HexMetrics {
         float h = step * HexMetrics.horizontalTerraceStepSize;
         return Color.Lerp(a, b, h);
     }
+
+    public static HexEdgeType GetEdgeType (int elevation1, int elevation2)
+    {
+        if (elevation1 == elevation2)
+            return HexEdgeType.Flat;
+        int delta = elevation2 - elevation1;
+        if(delta <= slopeLimit && delta >= -slopeLimit)
+        {
+            return HexEdgeType.Slope;
+        }
+        return HexEdgeType.Cliff;
+    }
+
+
 }
