@@ -11,7 +11,6 @@ public class HexGrid : MonoBehaviour {
     public Text cellLabelPrefab;
 
     public Color defaultColor = Color.white;
-    public Color touchedColor = Color.magenta;
 
     Canvas gridCanvas;
 
@@ -40,25 +39,7 @@ public class HexGrid : MonoBehaviour {
         hexMesh.Triangulate(cells);  
     }
 
-    void Update()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            HandleInput();
-        }
-    }
-
-    void HandleInput()
-    {
-        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if(Physics.Raycast(inputRay, out hit))
-        {
-            TouchCell(hit.point);
-        }
-    }
-
-    void TouchCell(Vector3 position)
+    public void ColorCell(Vector3 position, Color color)
     {
         // get coordinates for clicked cell
         position = transform.InverseTransformPoint(position);
@@ -67,7 +48,7 @@ public class HexGrid : MonoBehaviour {
         int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
         HexCell cell = cells[index];
         // change that cell's color
-        cell.color = touchedColor;
+        cell.color = color;
         // redraw the mesh with the new color for that hex
         hexMesh.Triangulate(cells);
     }
@@ -85,9 +66,48 @@ public class HexGrid : MonoBehaviour {
         cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
         cell.color = defaultColor;
 
+        CreateNeighborsForCell(x, z, i, cell);
+
         Text label = Instantiate<Text>(cellLabelPrefab);
         label.rectTransform.SetParent(gridCanvas.transform, false);
         label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
         label.text = cell.coordinates.ToStringOnSeparateLines();
+    }
+
+    private void CreateNeighborsForCell(int x, int z, int i, HexCell cell)
+    {
+        // Connect all cells E-W wise,
+        // skipping the first cell in each row which has no westward cell
+        // If you wanted the map to wrap E-W, you'd want to connect the cell at the end
+        // of a row with one at the beginning
+        if (x > 0)
+        {
+            cell.SetNeighbor(HexDirection.W, cells[i - 1]);
+        }
+        // Connect all cells NW-SE wise
+        // The first row of cells has no SE neighbors, so skip them
+        if (z > 0)
+        {
+            // if the index bitwise ends in 1, then it's an 'even' row because we count up from 0
+            // even rows (other than the first) always have a SE neighbor
+            if ((z & 1) == 0)
+            {
+                cell.SetNeighbor(HexDirection.SE, cells[i - width]);
+                // since we've made a mess already, let's go ahead and grab the SW neighbor, which
+                // every cell but the first has.
+                if (x > 0)
+                {
+                    cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
+                }
+            } else
+            {
+                // odd rows follow the opposite logic
+                cell.SetNeighbor(HexDirection.SW, cells[i - width]);
+                if(x < width - 1)
+                {
+                    cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
+                }
+            }
+        }
     }
 }
