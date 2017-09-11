@@ -7,9 +7,9 @@ public class HexMesh : MonoBehaviour {
     Mesh hexMesh;
     MeshCollider meshCollider;
 
-    static List<Vector3> vertices;
-    static List<int> triangles;
-    static List<Color> colors;
+    static List<Vector3> vertices = new List<Vector3>();
+    static List<int> triangles = new List<int>();
+    static List<Color> colors = new List<Color>();
 
     void Awake()
     {
