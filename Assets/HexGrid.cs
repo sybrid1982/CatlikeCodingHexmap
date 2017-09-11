@@ -18,8 +18,12 @@ public class HexGrid : MonoBehaviour {
 
     HexMesh hexMesh;
 
+    public Texture2D noiseSource;
+
     void Awake()
     {
+        HexMetrics.noiseSource = noiseSource;
+
         gridCanvas = GetComponentInChildren<Canvas>();
         hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -38,6 +42,11 @@ public class HexGrid : MonoBehaviour {
     {
         hexMesh.Triangulate(cells);  
     }
+
+    private void OnEnable()
+    {
+        HexMetrics.noiseSource = noiseSource;
+    } 
 
     public HexCell GetCell(Vector3 position)
     {
@@ -75,6 +84,8 @@ public class HexGrid : MonoBehaviour {
         label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
         label.text = cell.coordinates.ToStringOnSeparateLines();
         cell.uiRect = label.rectTransform;
+
+        cell.Elevation = 0;
     }
 
     private void CreateNeighborsForCell(int x, int z, int i, HexCell cell)
