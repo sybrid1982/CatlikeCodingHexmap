@@ -7,12 +7,18 @@ public class HexGridChunk : MonoBehaviour {
     HexMesh hexMesh;
     Canvas gridCanvas;
 
+    public void ShowUI (bool visible)
+    {
+        gridCanvas.gameObject.SetActive(visible);
+    }
+
     private void Awake()
     {
         gridCanvas = GetComponentInChildren<Canvas>();
         hexMesh = GetComponentInChildren<HexMesh>();
 
         cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+        ShowUI(false);
     }
 
     private void LateUpdate()
