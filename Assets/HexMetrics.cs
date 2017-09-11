@@ -30,6 +30,8 @@ public static class HexMetrics {
     public const float cellPerturbStrength = 4f;
     public const float elevationPerturbStrength = elevationStep / 3f;
 
+    public const int chunkSizeX = 5, chunkSizeZ = 5;
+
     static Vector3[] corners =
     {
         new Vector3(0f,0f,outerRadius),

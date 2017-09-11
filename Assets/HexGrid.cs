@@ -3,20 +3,20 @@ using UnityEngine.UI;
 
 public class HexGrid : MonoBehaviour {
 
-    public int width = 6;
-    public int height = 6;
+    public int chunkCountX = 4, chunkCountZ = 3;
 
+    public Color defaultColor = Color.white;
+    
     public HexCell cellPrefab;
 
     public Text cellLabelPrefab;
 
-    public Color defaultColor = Color.white;
+    public HexGridChunk chunkPrefab;
 
-    Canvas gridCanvas;
+    int cellCountX, cellCountZ;
 
     HexCell[] cells;
-
-    HexMesh hexMesh;
+    HexGridChunk[] chunks;
 
     public Texture2D noiseSource;
 
@@ -24,23 +24,11 @@ public class HexGrid : MonoBehaviour {
     {
         HexMetrics.noiseSource = noiseSource;
 
-        gridCanvas = GetComponentInChildren<Canvas>();
-        hexMesh = GetComponentInChildren<HexMesh>();
+        cellCountX = chunkCountX * HexMetrics.chunkSizeX;
+        cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
 
-        cells = new HexCell[height * width];
-
-        for (int z = 0, i = 0; z < height; z++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                CreateCell(x, z, i++);
-            }
-        }
-    }
-
-    private void Start()
-    {
-        hexMesh.Triangulate(cells);  
+        CreateChunks();
+        CreateCells();
     }
 
     private void OnEnable()
@@ -54,14 +42,35 @@ public class HexGrid : MonoBehaviour {
         position = transform.InverseTransformPoint(position);
         HexCoordinates coordinates = HexCoordinates.FromPosition(position);
         // translate those coordinates into the index in the array of cells
-        int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
+        int index = coordinates.X + coordinates.Z * cellCountX + coordinates.Z / 2;
         HexCell cell = cells[index];
         return cell;
     }
 
-    public void Refresh()
+    private void CreateChunks()
     {
-        hexMesh.Triangulate(cells);
+        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+        for(int z = 0, i = 0; z < chunkCountZ; z++)
+        {
+            for(int x = 0; x < chunkCountX; x++)
+            {
+                HexGridChunk chunk = chunks[i++] = Instantiate(chunkPrefab);
+                chunk.transform.SetParent(transform);
+            }
+        }
+    }
+
+    private void CreateCells()
+    {
+        cells = new HexCell[cellCountZ * cellCountX];
+
+        for (int z = 0, i = 0; z < cellCountZ; z++)
+        {
+            for (int x = 0; x < cellCountX; x++)
+            {
+                CreateCell(x, z, i++);
+            }
+        }
     }
 
     void CreateCell(int x, int z, int i)
@@ -72,20 +81,33 @@ public class HexGrid : MonoBehaviour {
         position.z = z * HexMetrics.outerRadius * 1.5f;
 
         HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
-        cell.transform.SetParent(transform, false);
+        //cell.transform.SetParent(transform, false);
         cell.transform.localPosition = position;
         cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-        cell.color = defaultColor;
+        cell.Color = defaultColor;
 
         CreateNeighborsForCell(x, z, i, cell);
 
         Text label = Instantiate<Text>(cellLabelPrefab);
-        label.rectTransform.SetParent(gridCanvas.transform, false);
+        //label.rectTransform.SetParent(gridCanvas.transform, false);
         label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
         label.text = cell.coordinates.ToStringOnSeparateLines();
         cell.uiRect = label.rectTransform;
 
         cell.Elevation = 0;
+
+        AddCellToChunk(x, z, cell);
+    }
+
+    void AddCellToChunk(int x, int z, HexCell cell)
+    {
+        int chunkX = x / HexMetrics.chunkSizeX;
+        int chunkZ = z / HexMetrics.chunkSizeZ;
+        HexGridChunk chunk = chunks[chunkX + chunkZ * chunkCountX];
+
+        int localX = x - chunkX * HexMetrics.chunkSizeX;
+        int localZ = z - chunkZ * HexMetrics.chunkSizeZ;
+        chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
 
     private void CreateNeighborsForCell(int x, int z, int i, HexCell cell)
@@ -106,20 +128,20 @@ public class HexGrid : MonoBehaviour {
             // even rows (other than the first) always have a SE neighbor
             if ((z & 1) == 0)
             {
-                cell.SetNeighbor(HexDirection.SE, cells[i - width]);
+                cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX]);
                 // since we've made a mess already, let's go ahead and grab the SW neighbor, which
                 // every cell but the first has.
                 if (x > 0)
                 {
-                    cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
+                    cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
                 }
             } else
             {
                 // odd rows follow the opposite logic
-                cell.SetNeighbor(HexDirection.SW, cells[i - width]);
-                if(x < width - 1)
+                cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
+                if(x < cellCountX - 1)
                 {
-                    cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
+                    cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
                 }
             }
         }
