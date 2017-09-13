@@ -114,7 +114,7 @@ public class HexGrid : MonoBehaviour {
         AddCellToChunk(x, z, cell);
     }
 
-    void AddCellToChunk(int x, int z, HexCell cell)
+    public void AddCellToChunk(int x, int z, HexCell cell)
     {
         int chunkX = x / HexMetrics.chunkSizeX;
         int chunkZ = z / HexMetrics.chunkSizeZ;

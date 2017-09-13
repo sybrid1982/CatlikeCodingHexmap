@@ -3,8 +3,11 @@
 public static class HexMetrics {
 
     //Hex size
+    public const float outerToInner = 0.866025404f;
+    public const float innerToOuter = 1f / outerToInner;
+
     public const float outerRadius = 10f;
-    public const float innerRadius = 10f * 0.866025404f;
+    public const float innerRadius = outerRadius * outerToInner;
 
     //% of hex that is kept solid
     public const float solidFactor = 0.8f;
@@ -22,7 +25,7 @@ public static class HexMetrics {
     //size of difference between two hexes that generates slopes as opposed to cliffs
     public const int slopeLimit = 1;
 
-    //Noise texture
+    //Noise texture and variables
     public static Texture2D noiseSource;
 
     public const float noiseScale = 0.003f;
@@ -30,7 +33,12 @@ public static class HexMetrics {
     public const float cellPerturbStrength = 4f;
     public const float elevationPerturbStrength = elevationStep / 3f;
 
+    //Size of a map chunk
     public const int chunkSizeX = 5, chunkSizeZ = 5;
+
+    //depth of rivers
+    public const float streamBedElevationOffset = -1.75f;
+    public const float riverSurfaceElevationOffset = -0.5f;
 
     static Vector3[] corners =
     {
@@ -103,5 +111,17 @@ public static class HexMetrics {
             position.z * noiseScale);
     }
 
+    public static Vector3 GetSolidEdgeMiddle (HexDirection direction)
+    {
+        return (corners[(int)direction] + corners[((int)direction + 1) % 6]) 
+            * (0.5f* solidFactor);
+    }
 
+    public static Vector3 Perturb(Vector3 position)
+    {
+        Vector4 sample = SampleNoise(position);
+        position.x += (sample.x * 2f - 1f) * cellPerturbStrength;
+        position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
+        return position;
+    }
 }
