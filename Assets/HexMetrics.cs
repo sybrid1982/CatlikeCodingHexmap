@@ -30,7 +30,7 @@ public static class HexMetrics {
 
     public const float noiseScale = 0.003f;
 
-    public const float cellPerturbStrength = 0f;
+    public const float cellPerturbStrength = 4f;
     public const float elevationPerturbStrength = elevationStep / 3f;
 
     //Size of a map chunk
@@ -43,6 +43,11 @@ public static class HexMetrics {
     //% of hex that is kept solid for water tiles (smaller means larger shore region)
     public const float waterFactor = 0.6f;
     public const float waterBlendFactor = 1f - waterFactor;
+
+    //Hash grid
+    public const int hashGridSize = 256;
+    static HexHash[] hashGrid;
+    public const float hashGridScale = 0.25f;
 
     static Vector3[] corners =
     {
@@ -143,5 +148,40 @@ public static class HexMetrics {
         position.x += (sample.x * 2f - 1f) * cellPerturbStrength;
         position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
         return position;
+    }
+
+    public static void InitializeHashGrid(int seed)
+    {
+        hashGrid = new HexHash[hashGridSize * hashGridSize];
+        Random.State currentState = Random.state;       //Save the random number stream state
+        Random.InitState(seed);                         //Set the random number stream to a seed
+        for(int i = 0; i < hashGrid.Length; i++)
+        {
+            hashGrid[i] = HexHash.Create();
+        }
+        Random.state = currentState;                    //Reset the random number stream to the old state
+    }
+
+    public static HexHash SampleHashGrid (Vector3 position)
+    {
+        int x = (int)(position.x * hashGridScale) % hashGridSize;
+        if (x < 0)
+            x += hashGridSize;
+        int z = (int)(position.z * hashGridScale) % hashGridSize;
+        if (z < 0)
+            z += hashGridSize;
+        return hashGrid[x + z * hashGridSize];
+    }
+
+    static float[][] featureThresholds =
+    {
+        new float[] {0.0f, 0.0f, 0.4f},
+        new float[] {0.0f, 0.4f, 0.6f},
+        new float[] {0.4f, 0.6f, 0.8f}
+    };
+
+    public static float[] GetFeatureThresholds (int level)
+    {
+        return featureThresholds[level];
     }
 }

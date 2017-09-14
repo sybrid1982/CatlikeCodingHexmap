@@ -15,6 +15,9 @@ public class HexCell : MonoBehaviour {
     [SerializeField]
     bool[] roads;
 
+    [SerializeField]
+    HexCell[] neighbors;
+
     public bool HasIncomingRiver {
         get
         {
@@ -104,6 +107,12 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    bool IsValidRiverDestination (HexCell neighbor)
+    {
+        return neighbor & (
+            elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
+    }
+
     public int WaterLevel {
         get
         {
@@ -116,6 +125,7 @@ public class HexCell : MonoBehaviour {
                 return;
             }
             waterLevel = value;
+            ValidateRivers();
             Refresh();
         }
     }
@@ -198,7 +208,7 @@ public class HexCell : MonoBehaviour {
         }
 
         HexCell neighbor = GetNeighbor(direction);
-        if (!neighbor || elevation < neighbor.elevation)
+        if (!IsValidRiverDestination(neighbor))
         {
             return;
         }
@@ -240,16 +250,7 @@ public class HexCell : MonoBehaviour {
             uiPosition.z = -position.y;
             uiRect.localPosition = uiPosition;
 
-            if (hasOutgoingRiver &&
-                elevation < GetNeighbor(outgoingRiver).elevation)
-            {
-                RemoveOutgoingRiver();
-            }
-            if (hasIncomingRiver &&
-                elevation > GetNeighbor(incomingRiver).elevation)
-            {
-                RemoveIncomingRiver();
-            }
+            ValidateRivers();
 
             for (int i = 0; i < roads.Length; i++)
             {
@@ -315,8 +316,66 @@ public class HexCell : MonoBehaviour {
 
     int elevation = int.MinValue;
 
-    [SerializeField]
-    HexCell[] neighbors;
+    void ValidateRivers()
+    {
+        if(hasOutgoingRiver && !IsValidRiverDestination(GetNeighbor(outgoingRiver)))
+        {
+            RemoveOutgoingRiver();
+        }
+        if(hasIncomingRiver && !GetNeighbor(IncomingRiver).IsValidRiverDestination(this))
+        {
+            RemoveIncomingRiver();
+        }
+    }
+
+    public int UrbanLevel
+    {
+        get
+        {
+            return urbanLevel;
+        }
+        set
+        {
+            if (urbanLevel != value)
+            {
+                urbanLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
+    public int FarmLevel
+    {
+        get
+        {
+            return farmLevel;
+        }
+        set
+        {
+            if(farmLevel != value)
+            {
+                farmLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
+    public int PlantLevel {
+        get
+        {
+            return plantLevel;
+        }
+        set
+        {
+            if(plantLevel != value)
+            {
+                plantLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
+    int urbanLevel, farmLevel, plantLevel;
 
     public HexCell GetNeighbor(HexDirection direction)
     {
