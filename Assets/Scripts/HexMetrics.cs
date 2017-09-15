@@ -49,6 +49,16 @@ public static class HexMetrics {
     static HexHash[] hashGrid;
     public const float hashGridScale = 0.25f;
 
+    //Walls
+    public const float wallHeight = 4f;
+    public const float wallYOffset = -1f;
+    public const float wallThickness = 0.75f;
+    public const float wallElevationOffset = verticalTerraceStepSize;
+    public const float wallTowerThreshold = 0.5f;
+
+    //bridges
+    public const float bridgeDesignLength = 7f;
+
     static Vector3[] corners =
     {
         new Vector3(0f,0f,outerRadius),
@@ -183,5 +193,24 @@ public static class HexMetrics {
     public static float[] GetFeatureThresholds (int level)
     {
         return featureThresholds[level];
+    }
+
+    public static Vector3 WallThicknessOffset (Vector3 near, Vector3 far)
+    {
+        Vector3 offset;
+        offset.x = far.x - near.x;
+        offset.y = 0;
+        offset.z = far.z - near.z;
+        return offset.normalized * (wallThickness * 0.5f);
+    }
+
+    public static Vector3 WallLerp(Vector3 near, Vector3 far)
+    {
+        near.x += (far.x - near.x) * 0.5f;
+        near.z += (far.z - near.z) * 0.5f;
+        float v =
+            near.y < far.y ? wallElevationOffset : (1f - wallElevationOffset);
+        near.y += (far.y - near.y) * v + wallYOffset;
+        return near;
     }
 }

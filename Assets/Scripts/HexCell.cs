@@ -398,6 +398,23 @@ public class HexCell : MonoBehaviour {
         return HexMetrics.GetEdgeType(elevation, otherCell.elevation);
     }
 
+    public bool Walled
+    {
+        get
+        {
+            return walled;
+        }
+        set
+        {
+            if(walled != value)
+            {
+                walled = value;
+                Refresh();
+            }
+        }
+    }
+    bool walled;
+
     void Refresh()
     {
         if (chunk)
