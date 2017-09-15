@@ -773,6 +773,9 @@ MonoBehaviour:
   walls: {fileID: 114321005866794090}
   wallTower: {fileID: 4496401390928140, guid: 102de4d54778731489c13b31ad0872de, type: 2}
   bridge: {fileID: 4743010019478912, guid: bda93b8b3942dd34694505ffde1957e2, type: 2}
+  special:
+  - {fileID: 4802085157497132, guid: 4ff004428a110de4aae27dcdc1366227, type: 2}
+  - {fileID: 4205443990691460, guid: fbbe7719526743345953fd6124a0e235, type: 2}
 --- !u!223 &223343623004384292
 Canvas:
   m_ObjectHideFlags: 1

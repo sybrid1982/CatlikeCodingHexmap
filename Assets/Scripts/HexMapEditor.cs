@@ -1,23 +1,22 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using System.IO;
 
 public class HexMapEditor : MonoBehaviour {
 
-    public Color[] colors;
-
     public HexGrid hexGrid;
-
-    private Color activeColor;
+    
     int activeElevation;
     int activeWaterLevel;
-    int activeUrbanLevel, activeFarmLevel, activePlantLevel;
+    int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
+    int activeTerrainTypeIndex;
 
-    bool applyColor;
     bool applyElevation = true;
     bool applyWaterLevel = true;
     bool applyUrbanLevel = true;
     bool applyFarmLevel = true;
     bool applyPlantLevel = true;
+    bool applySpecialIndex;
 
     int brushSize;
 
@@ -32,11 +31,6 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     OptionalToggle riverMode, roadMode, walledMode;
-
-    private void Awake()
-    {
-        SelectColor(0);    
-    }
 
     void Update()
     {
@@ -75,9 +69,9 @@ public class HexMapEditor : MonoBehaviour {
     {
         if (cell)
         {
-            if (applyColor)
+            if(activeTerrainTypeIndex >= 0)
             {
-                cell.Color = activeColor;
+                cell.TerrainTypeIndex = activeTerrainTypeIndex;
             }
             if (applyElevation)
             {
@@ -86,6 +80,10 @@ public class HexMapEditor : MonoBehaviour {
             if (applyWaterLevel)
             {
                 cell.WaterLevel = activeWaterLevel;
+            }
+            if (applySpecialIndex)
+            {
+                cell.SpecialIndex = activeSpecialIndex;
             }
             if(riverMode == OptionalToggle.No)
             {
@@ -171,13 +169,9 @@ public class HexMapEditor : MonoBehaviour {
         isDrag = false;
     }
 
-    public void SelectColor (int index)
+    public void SetTerrainTypeIndex(int index)
     {
-        applyColor = index >= 0;
-        if (applyColor)
-        {
-            activeColor = colors[index];
-        }
+        activeTerrainTypeIndex = index;
     }
 
     public void SetElevation (float elevation)
@@ -253,5 +247,50 @@ public class HexMapEditor : MonoBehaviour {
     public void SetWalledMode (int mode)
     {
         walledMode = (OptionalToggle)mode;
+    }
+
+    public void SetApplySpecialIndex(bool toggle)
+    {
+        applySpecialIndex = toggle;
+    }
+
+    public void SetSpecialIndex(float level)
+    {
+        activeSpecialIndex = (int)level;
+    }
+
+    ////////////////////////////
+    //Saving and Loading
+    ////////////////////////////
+    public void Save()
+    {
+        string path = Path.Combine(Application.persistentDataPath, "test.map");
+        using (
+            BinaryWriter writer =
+                new BinaryWriter(File.Open(path, FileMode.Create))
+                )
+        {
+            writer.Write(0);
+            hexGrid.Save(writer);
+        }
+    }
+    public void Load()
+    {
+        string path = Path.Combine(Application.persistentDataPath, "test.map");
+        using (
+            BinaryReader reader =
+                new BinaryReader(File.OpenRead(path)))
+        {
+            int header = reader.ReadInt32();
+            
+            if (header == 0)
+            {
+                hexGrid.Load(reader);
+            } else
+            {
+                Debug.LogWarning("Unknown Map Format " + header);
+            }
+            
+        }
     }
 }
