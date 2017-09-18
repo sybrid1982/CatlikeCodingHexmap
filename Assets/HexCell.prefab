@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4498399520880550}
-  - component: {fileID: 114855708221848676}
+  - component: {fileID: 114674030419597226}
   m_Layer: 0
   m_Name: HexCell
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114855708221848676
+--- !u!114 &114674030419597226
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -48,15 +48,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1868141268961916}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 284c03453c2814c44af34cb0a61c820a, type: 3}
+  m_Script: {fileID: 11500000, guid: e3d3de04c7eaa4677adc5cb5e120ecef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   coordinates:
     x: 0
     z: 0
-  uiRect: {fileID: 0}
+  uiRect: {fileID: 224370291249526166, guid: 9bea87bdb6a5ed340bf02531d1067137, type: 2}
   chunk: {fileID: 0}
-  roads: 000000000000
   neighbors:
   - {fileID: 0}
   - {fileID: 0}
@@ -64,3 +63,4 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  roads: 000000000000
