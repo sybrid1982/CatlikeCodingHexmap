@@ -10,7 +10,58 @@ public class HexCell : MonoBehaviour {
 
 	public HexGridChunk chunk;
 
+    public HexCellShaderData ShaderData { get; set; }
+    public int Index { get; set; }
+
+    // Fog of war
+    int visibility;
+
+    public bool IsVisible
+    {
+        get
+        {
+            return visibility > 0;
+        }
+    }
+
+    public void IncreaseVisibility()
+    {
+        visibility += 1;
+        if(visibility == 1)
+        {
+            ShaderData.RefreshVisibility(this);
+        }
+    }
+    
+    public void DecreaseVisibility()
+    {
+        visibility -= 1;
+        if(visibility == 0)
+        {
+            ShaderData.RefreshVisibility(this);
+        }
+    }
+
+    // Pathfinding
+    public HexCell PathFrom { get; set; }
+
+    public int SearchHeuristic { get; set; }
+
+    public int SearchPhase { get; set; }
+
+    public int SearchPriority
+    {
+        get
+        {
+            return distance + SearchHeuristic;
+        }
+    }
+
+    public HexCell NextWithSamePriority { get; set; }
+
     int distance;
+
+    public HexUnit Unit { get; set; }
 
     public int Distance
     {
@@ -21,14 +72,13 @@ public class HexCell : MonoBehaviour {
         set
         {
             distance = value;
-            UpdateDistanceLabel();
         }
     }
 
-    void UpdateDistanceLabel ()
+    public void SetLabel (string text)
     {
         Text label = uiRect.GetComponent<Text>();
-        label.text = distance == int.MaxValue ? "" : distance.ToString();
+        label.text = text;
     }
 
 	public int Elevation {
@@ -231,7 +281,7 @@ public class HexCell : MonoBehaviour {
 		set {
 			if (terrainTypeIndex != value) {
 				terrainTypeIndex = value;
-				Refresh();
+                ShaderData.RefreshTerrain(this);
 			}
 		}
 	}
@@ -393,7 +443,23 @@ public class HexCell : MonoBehaviour {
 		RefreshSelfOnly();
 	}
 
-	void RefreshPosition () {
+    //Highlights
+    public void DisableHighlight()
+    {
+        Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+        highlight.enabled = false;
+    }
+
+    public void EnableHighlight(Color color)
+    {
+        Image highlight = uiRect.GetChild(0).GetComponent<Image>();
+        highlight.color = color;
+        highlight.enabled = true;
+    }
+
+    //Cell Refreshing
+
+    void RefreshPosition () {
 		Vector3 position = transform.localPosition;
 		position.y = elevation * HexMetrics.elevationStep;
 		position.y +=
@@ -415,13 +481,23 @@ public class HexCell : MonoBehaviour {
 					neighbor.chunk.Refresh();
 				}
 			}
+            if (Unit)
+            {
+                Unit.ValidateLocation();
+            }
 		}
 	}
 
 	void RefreshSelfOnly () {
 		chunk.Refresh();
+        if (Unit)
+        {
+            Unit.ValidateLocation();
+        }
 	}
 
+    // SAVING AND LOADING
+     
 	public void Save (BinaryWriter writer) {
 		writer.Write((byte)terrainTypeIndex);
 		writer.Write((byte)elevation);
@@ -457,6 +533,7 @@ public class HexCell : MonoBehaviour {
 
 	public void Load (BinaryReader reader) {
 		terrainTypeIndex = reader.ReadByte();
+        ShaderData.RefreshTerrain(this);
 		elevation = reader.ReadByte();
 		RefreshPosition();
 		waterLevel = reader.ReadByte();
