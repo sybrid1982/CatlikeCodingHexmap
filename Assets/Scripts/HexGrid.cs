@@ -429,6 +429,7 @@ public class HexGrid : MonoBehaviour {
             searchFrontier.Clear();
         }
 
+        fromCell.SearchPhase = searchFrontierPhase;
         fromCell.Distance = 0;
         searchFrontier.Enqueue(fromCell);
         while (searchFrontier.Count > 0)
