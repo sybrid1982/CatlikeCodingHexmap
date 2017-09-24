@@ -599,7 +599,7 @@ MonoBehaviour:
   useCollider: 0
   useUVCoordinates: 1
   useUV2Coordinates: 0
-  useCellData: 0
+  useCellData: 1
 --- !u!114 &114194587938867114
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -629,7 +629,7 @@ MonoBehaviour:
   useCollider: 0
   useUVCoordinates: 1
   useUV2Coordinates: 0
-  useCellData: 0
+  useCellData: 1
 --- !u!114 &114302519978877576
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -644,7 +644,7 @@ MonoBehaviour:
   useCollider: 0
   useUVCoordinates: 1
   useUV2Coordinates: 0
-  useCellData: 0
+  useCellData: 1
 --- !u!114 &114398186008954606
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -739,7 +739,7 @@ MonoBehaviour:
   useCollider: 0
   useUVCoordinates: 1
   useUV2Coordinates: 0
-  useCellData: 0
+  useCellData: 1
 --- !u!114 &114729597260569422
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -754,7 +754,7 @@ MonoBehaviour:
   useCollider: 0
   useUVCoordinates: 1
   useUV2Coordinates: 1
-  useCellData: 0
+  useCellData: 1
 --- !u!114 &114799879604341678
 MonoBehaviour:
   m_ObjectHideFlags: 1

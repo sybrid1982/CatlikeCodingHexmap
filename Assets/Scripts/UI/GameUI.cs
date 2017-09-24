@@ -34,6 +34,13 @@ public class GameUI : MonoBehaviour {
         enabled = !toggle;
         hexGrid.ShowUI(!toggle);
         hexGrid.ClearPath();
+        if(toggle)
+        {
+            Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+        } else
+        {
+            Shader.DisableKeyword("HEX_MAP_EDIT_MODE");
+        }
     }
 
     bool UpdateCurrentCell ()
@@ -64,7 +71,7 @@ public class GameUI : MonoBehaviour {
         {
             if (currentCell && selectedUnit.IsValidDestination(currentCell))
             {
-                hexGrid.FindPath(selectedUnit.Location, currentCell, HexPathMetrics.testSpeed);
+                hexGrid.FindPath(selectedUnit.Location, currentCell, selectedUnit);
             } else
             {
                 hexGrid.ClearPath();
@@ -81,4 +88,24 @@ public class GameUI : MonoBehaviour {
         }
     }
 
+    // This is a debug function that could be adjusted for use in a game
+    
+    public void RefreshVision()
+    {
+        // Set everyone's vision blank
+        int z = 0;
+        for(int i = 0; i < hexGrid.cellCountX * hexGrid.cellCountZ; i++)
+        {
+            int x = i % hexGrid.cellCountZ;
+            if(i > 0 && x == 0)
+            {
+                z++;
+            }
+            HexCoordinates coords = new HexCoordinates(x, z);
+            HexCell cell = hexGrid.GetCell(coords);
+            cell.ResetVisibility();
+        }
+        // Tell the hexgrid to tell each unit to refresh its vision
+        hexGrid.RefreshAllUnitsVision();
+    }
 }

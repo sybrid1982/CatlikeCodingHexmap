@@ -15,6 +15,7 @@ public class HexCell : MonoBehaviour {
 
     // Fog of war
     int visibility;
+    public bool IsExplored { get; private set; }
 
     public bool IsVisible
     {
@@ -29,6 +30,7 @@ public class HexCell : MonoBehaviour {
         visibility += 1;
         if(visibility == 1)
         {
+            IsExplored = true;
             ShaderData.RefreshVisibility(this);
         }
     }
@@ -36,9 +38,10 @@ public class HexCell : MonoBehaviour {
     public void DecreaseVisibility()
     {
         visibility -= 1;
-        if(visibility == 0)
+        if(visibility <= 0)
         {
             ShaderData.RefreshVisibility(this);
+            visibility = 0;     // Should never have have fewer than 0 units providing visibility
         }
     }
 
@@ -496,6 +499,12 @@ public class HexCell : MonoBehaviour {
         }
 	}
 
+    public void ResetVisibility()
+    {
+        visibility = 0;
+        IsExplored = false;
+    }
+
     // SAVING AND LOADING
      
 	public void Save (BinaryWriter writer) {
@@ -529,9 +538,10 @@ public class HexCell : MonoBehaviour {
 			}
 		}
 		writer.Write((byte)roadFlags);
+        writer.Write(IsExplored);
 	}
 
-	public void Load (BinaryReader reader) {
+	public void Load (BinaryReader reader, int header) {
 		terrainTypeIndex = reader.ReadByte();
         ShaderData.RefreshTerrain(this);
 		elevation = reader.ReadByte();
@@ -565,5 +575,10 @@ public class HexCell : MonoBehaviour {
 		for (int i = 0; i < roads.Length; i++) {
 			roads[i] = (roadFlags & (1 << i)) != 0;
 		}
+        if (header >= 3)
+        {
+            IsExplored = reader.ReadBoolean();
+        }
+        ShaderData.RefreshVisibility(this);
 	}
 }

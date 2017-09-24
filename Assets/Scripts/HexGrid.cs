@@ -243,7 +243,7 @@ public class HexGrid : MonoBehaviour {
 		}
 
 		for (int i = 0; i < cells.Length; i++) {
-			cells[i].Load(reader);
+			cells[i].Load(reader, header);
 		}
 		for (int i = 0; i < chunks.Length; i++) {
 			chunks[i].Refresh();
@@ -261,15 +261,15 @@ public class HexGrid : MonoBehaviour {
 
     // PATHFINDING
 
-    public void FindPath (HexCell fromCell, HexCell toCell, int speed)
+    public void FindPath (HexCell fromCell, HexCell toCell, HexUnit unit)
     {
         ClearPath();
 
         currentPathFrom = fromCell;
         currentPathTo = toCell;
-        currentPathExists = Search(fromCell, toCell, speed);
+        currentPathExists = Search(fromCell, toCell, unit);
         if(currentPathExists)
-            ShowPath(speed);
+            ShowPath(unit.Speed);
     }
 
     // Displays the path
@@ -307,7 +307,7 @@ public class HexGrid : MonoBehaviour {
         currentPathFrom = currentPathTo = null;
     }
 
-    bool Search (HexCell fromCell, HexCell toCell, int speed)
+    bool Search (HexCell fromCell, HexCell toCell, HexUnit unit)
     {
         searchFrontierPhase += 2;
         if(searchFrontier == null)
@@ -330,7 +330,7 @@ public class HexGrid : MonoBehaviour {
                 return true;
             }
 
-            int currentTurn = (current.Distance - 1) / speed;
+            int currentTurn = (current.Distance - 1) / unit.Speed;
 
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
             {
@@ -340,35 +340,21 @@ public class HexGrid : MonoBehaviour {
                 {
                     continue;
                 }
-                if (neighbor.IsUnderwater || neighbor.Unit)
+                if (!unit.IsValidDestination(neighbor))
                 {
                     continue;
                 }
-                HexEdgeType edgeType = current.GetEdgeType(neighbor);
-                if(edgeType == HexEdgeType.Cliff)
+                int moveCost = unit.GetMoveCost(current, neighbor, d);
+                if(moveCost < 0)
                 {
                     continue;
-                }
-                int moveCost;
-                if(current.HasRoadThroughEdge(d))
-                {
-                    moveCost = HexPathMetrics.roadCost;
-                }  else if(current.Walled != neighbor.Walled)
-                {
-                    continue;
-                }
-                    else
-                {
-                    moveCost =  edgeType == HexEdgeType.Flat ? HexPathMetrics.flatCost : HexPathMetrics.slopeCost;
-                    moveCost += (neighbor.UrbanLevel + neighbor.FarmLevel +
-                        neighbor.PlantLevel) * HexPathMetrics.developmentCost;
                 }
 
                 int distance = current.Distance + moveCost;
-                int turn = distance / speed;
+                int turn = distance / unit.Speed;
                 if(turn > currentTurn)
                 {
-                    distance = turn * speed + moveCost;
+                    distance = turn * unit.Speed + moveCost;
                 }
 
                 if(neighbor.SearchPhase < searchFrontierPhase)
@@ -446,15 +432,7 @@ public class HexGrid : MonoBehaviour {
                 {
                     continue;
                 }
-                if (neighbor.IsUnderwater || neighbor.Unit)
-                {
-                    continue;
-                }
                 HexEdgeType edgeType = current.GetEdgeType(neighbor);
-                if (edgeType == HexEdgeType.Cliff)
-                {
-                    continue;
-                }
 
                 int distance = current.Distance + 1;
                 if (distance > range)
@@ -498,5 +476,24 @@ public class HexGrid : MonoBehaviour {
             cells[i].DecreaseVisibility();
         }
         ListPool<HexCell>.Add(cells);
+    }
+
+    void RefreshUnitVision(HexUnit unit)
+    {
+        unit.enabled = false;       // Disable the unit
+        unit.enabled = true;        // Then enable to trigger on Enabled which triggers vision
+    }
+
+    void RefreshUnitsVision (HexUnit[] pUnits)
+    {
+        foreach(HexUnit unit in pUnits)
+        {
+            RefreshUnitVision(unit);
+        }
+    }
+
+    public void RefreshAllUnitsVision()
+    {
+        RefreshUnitsVision(units.ToArray());
     }
 }

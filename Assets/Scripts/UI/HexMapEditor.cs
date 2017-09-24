@@ -21,6 +21,9 @@ public class HexMapEditor : MonoBehaviour {
 
 	bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
 
+    public GameObject featurePanel;
+    public GameObject terrainPanel;
+
 	enum OptionalToggle {
 		Ignore, Yes, No
 	}
@@ -34,6 +37,8 @@ public class HexMapEditor : MonoBehaviour {
     public void SetEditMode (bool toggle)
     {
         enabled = toggle;
+        featurePanel.SetActive(toggle);
+        terrainPanel.SetActive(toggle);
     }
 
 	public void SetTerrainTypeIndex (int index) {
