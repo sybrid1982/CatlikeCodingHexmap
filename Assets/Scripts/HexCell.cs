@@ -15,15 +15,22 @@ public class HexCell : MonoBehaviour {
 
     // Fog of war
     int visibility;
-    public bool IsExplored { get; private set; }
+    bool explored;
+    public bool IsExplored
+    {
+        get { return explored; }
+        private set { explored = value; }
+    }
 
     public bool IsVisible
     {
         get
         {
-            return visibility > 0;
+            return visibility > 0 && Explorable;
         }
     }
+
+    public bool Explorable { get; set; }
 
     public void IncreaseVisibility()
     {

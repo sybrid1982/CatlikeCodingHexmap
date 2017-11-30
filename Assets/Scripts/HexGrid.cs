@@ -122,6 +122,16 @@ public class HexGrid : MonoBehaviour {
 		return cells[x + z * cellCountX];
 	}
 
+    public HexCell GetCell (int xOffset, int zOffset)
+    {
+        return cells[xOffset + zOffset * cellCountX];
+    }
+
+    public HexCell GetCell (int cellIndex)
+    {
+        return cells[cellIndex];
+    }
+
 	public void ShowUI (bool visible) {
 		for (int i = 0; i < chunks.Length; i++) {
 			chunks[i].ShowUI(visible);
@@ -139,6 +149,8 @@ public class HexGrid : MonoBehaviour {
 		cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
         cell.Index = i;
         cell.ShaderData = cellShaderData;
+
+        cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
 
 		if (x > 0) {
 			cell.SetNeighbor(HexDirection.W, cells[i - 1]);
@@ -419,11 +431,12 @@ public class HexGrid : MonoBehaviour {
             searchFrontier.Clear();
         }
 
-        range = fromCell.ViewElevation;
+        range += fromCell.ViewElevation;
         fromCell.SearchPhase = searchFrontierPhase;
         fromCell.Distance = 0;
         searchFrontier.Enqueue(fromCell);
 
+        HexCoordinates fromCoordinates = fromCell.coordinates;
         while (searchFrontier.Count > 0)
         {
             HexCell current = searchFrontier.Dequeue();
@@ -434,14 +447,16 @@ public class HexGrid : MonoBehaviour {
             {
                 HexCell neighbor = current.GetNeighbor(d);
                 if (neighbor == null ||
-                    neighbor.SearchPhase > searchFrontierPhase)
+                    neighbor.SearchPhase > searchFrontierPhase ||
+                    !neighbor.Explorable)
                 {
                     continue;
                 }
                 HexEdgeType edgeType = current.GetEdgeType(neighbor);
 
                 int distance = current.Distance + 1;
-                if (distance + neighbor.ViewElevation > range)
+                if (distance + neighbor.ViewElevation > range ||
+                    distance > fromCoordinates.DistanceTo(neighbor.coordinates))
                 {
                     continue;
                 }
