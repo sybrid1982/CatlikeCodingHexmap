@@ -454,7 +454,7 @@ public class HexMapGenerator : MonoBehaviour {
             climate.Add(initialData);
             nextClimate.Add(clearData);
         }
-        for (int cycle = 0; cycle < 2; cycle++)
+        for (int cycle = 0; cycle < 40; cycle++)
         {
             for (int i = 0; i < cellCount; i++)
             {
@@ -494,7 +494,7 @@ public class HexMapGenerator : MonoBehaviour {
         }
 
         HexDirection mainDispersalDirection = windDirection.Opposite();
-        float cloudDispersal = cellClimate.clouds * (1f / 5f + windStrength);
+        float cloudDispersal = cellClimate.clouds * (1f / (5f + windStrength));
         float runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
         float seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
 
@@ -527,8 +527,10 @@ public class HexMapGenerator : MonoBehaviour {
                 cellClimate.moisture -= seepage;
                 neighborClimate.moisture += seepage;
             }
+
             nextClimate[neighbor.Index] = neighborClimate;
         }
+
         ClimateData nextCellClimate = nextClimate[cellIndex];
         nextCellClimate.moisture += cellClimate.moisture;
         if(nextCellClimate.moisture > 1f)
