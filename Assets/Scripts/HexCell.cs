@@ -609,4 +609,9 @@ public class HexCell : MonoBehaviour {
         }
         ShaderData.RefreshVisibility(this);
 	}
+
+    public void SetMapData (float data)
+    {
+        ShaderData.SetMapData(this, data);
+    }
 }
