@@ -314,6 +314,8 @@ public class HexCell : MonoBehaviour {
 		}
 	}
 
+    public int ColumnIndex { get; set; }
+
 	int terrainTypeIndex;
 
 	int elevation = int.MinValue;
