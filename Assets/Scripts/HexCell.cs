@@ -314,6 +314,8 @@ public class HexCell : MonoBehaviour {
 		}
 	}
 
+    public int ColumnIndex { get; set; }
+
 	int terrainTypeIndex;
 
 	int elevation = int.MinValue;
@@ -609,4 +611,9 @@ public class HexCell : MonoBehaviour {
         }
         ShaderData.RefreshVisibility(this);
 	}
+
+    public void SetMapData (float data)
+    {
+        ShaderData.SetMapData(this, data);
+    }
 }

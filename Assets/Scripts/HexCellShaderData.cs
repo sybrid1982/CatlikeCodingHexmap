@@ -27,7 +27,7 @@ public class HexCellShaderData : MonoBehaviour {
             cellTexture = new Texture2D(
                 x, z, TextureFormat.RGBA32, false, true);
             cellTexture.filterMode = FilterMode.Point;
-            cellTexture.wrapMode = TextureWrapMode.Clamp;
+            cellTexture.wrapMode = TextureWrapMode.Repeat;
             Shader.SetGlobalTexture("_HexCellData", cellTexture);
         }
         Shader.SetGlobalVector(
@@ -130,6 +130,13 @@ public class HexCellShaderData : MonoBehaviour {
     public void ViewElevationChanged ()
     {
         needsVisibilityReset = true;
+        enabled = true;
+    }
+
+    public void SetMapData (HexCell cell, float data)
+    {
+        cellTextureData[cell.Index].b =
+            data < 0f ? (byte)0 : (data < 1f ? (byte)(data*255f) : (byte)255);
         enabled = true;
     }
 }
