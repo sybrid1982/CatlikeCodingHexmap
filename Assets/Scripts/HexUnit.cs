@@ -122,7 +122,7 @@ public class HexUnit : MonoBehaviour {
 
     public bool IsValidDestination(HexCell cell)
     {
-        return cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
+        return cell.IsExplored && !cell.Terrain.IsUnderwater && !cell.Unit;
     }
 
     public void Travel(List<HexCell> path)

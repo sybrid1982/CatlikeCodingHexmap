@@ -115,7 +115,7 @@ public class HexFeatureManager : MonoBehaviour {
 	) {
 		if (
 			nearCell.Walled != farCell.Walled &&
-			!nearCell.IsUnderwater && !farCell.IsUnderwater &&
+			!nearCell.Terrain.IsUnderwater && !farCell.Terrain.IsUnderwater &&
 			nearCell.GetEdgeType(farCell) != HexEdgeType.Cliff
 		) {
 			AddWallSegment(near.v1, far.v1, near.v2, far.v2);
@@ -214,19 +214,19 @@ public class HexFeatureManager : MonoBehaviour {
 		Vector3 left, HexCell leftCell,
 		Vector3 right, HexCell rightCell
 	) {
-		if (pivotCell.IsUnderwater) {
+		if (pivotCell.Terrain.IsUnderwater) {
 			return;
 		}
 
-		bool hasLeftWall = !leftCell.IsUnderwater &&
+		bool hasLeftWall = !leftCell.Terrain.IsUnderwater &&
 			pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
-		bool hasRighWall = !rightCell.IsUnderwater &&
+		bool hasRighWall = !rightCell.Terrain.IsUnderwater &&
 			pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
 
 		if (hasLeftWall) {
 			if (hasRighWall) {
 				bool hasTower = false;
-				if (leftCell.Elevation == rightCell.Elevation) {
+				if (leftCell.Terrain.Elevation == rightCell.Terrain.Elevation) {
 					HexHash hash = HexMetrics.SampleHashGrid(
 						(pivot + left + right) * (1f / 3f)
 					);
@@ -234,7 +234,7 @@ public class HexFeatureManager : MonoBehaviour {
 				}
 				AddWallSegment(pivot, left, pivot, right, hasTower);
 			}
-			else if (leftCell.Elevation < rightCell.Elevation) {
+			else if (leftCell.Terrain.Elevation < rightCell.Terrain.Elevation) {
 				AddWallWedge(pivot, left, right);
 			}
 			else {
@@ -242,7 +242,7 @@ public class HexFeatureManager : MonoBehaviour {
 			}
 		}
 		else if (hasRighWall) {
-			if (rightCell.Elevation < leftCell.Elevation) {
+			if (rightCell.Terrain.Elevation < leftCell.Terrain.Elevation) {
 				AddWallWedge(right, pivot, left);
 			}
 			else {

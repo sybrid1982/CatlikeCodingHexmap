@@ -163,11 +163,13 @@ public class HexGrid : MonoBehaviour {
         position.z = z * (HexMetrics.outerRadius * 1.5f);
 
         HexCell cell = cells[i] = Instantiate<HexCell>(cellPrefab);
-        cell.transform.localPosition = position;
-        cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-        cell.Index = i;
-        cell.ColumnIndex = x / HexMetrics.chunkSizeX;
-        cell.ShaderData = cellShaderData;
+        cell.Initialize(
+            position,
+            HexCoordinates.FromOffsetCoordinates(x, z),
+            i,
+            x / HexMetrics.chunkSizeX,
+            cellShaderData
+        );
 
         if (wrapping) {
             cell.Explorable = z > 0 && z < cellCountZ - 1;
@@ -210,7 +212,7 @@ public class HexGrid : MonoBehaviour {
 			new Vector2(position.x, position.z);
 		cell.uiRect = label.rectTransform;
 
-		cell.Elevation = 0;
+		cell.Terrain.Elevation = 0;
 
 		AddCellToChunk(x, z, cell);
 	}

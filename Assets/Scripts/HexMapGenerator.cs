@@ -141,7 +141,7 @@ public class HexMapGenerator : MonoBehaviour {
         }
         for(int i = 0; i < cellCount; i++)
         {
-            grid.GetCell(i).WaterLevel = waterLevel;
+            grid.GetCell(i).Terrain.WaterLevel = waterLevel;
         }
         CreateRegions();
         CreateLand();
@@ -289,13 +289,13 @@ public class HexMapGenerator : MonoBehaviour {
         while (size < chunkSize && searchFrontier.Count > 0)
         {
             HexCell current = searchFrontier.Dequeue();
-            int originalElevation = current.Elevation;
+            int originalElevation = current.Terrain.Elevation;
             int newElevation = originalElevation + rise;
             if(newElevation > elevationMaximum)
             {
                 continue;
             }
-            current.Elevation = newElevation;
+            current.Terrain.Elevation = newElevation;
             if (originalElevation < waterLevel &&
                 newElevation >= waterLevel && 
                 --budget == 0) { 
@@ -335,13 +335,13 @@ public class HexMapGenerator : MonoBehaviour {
         while (size < chunkSize && searchFrontier.Count > 0)
         {
             HexCell current = searchFrontier.Dequeue();
-            int originalElevation = current.Elevation;
-            int newElevation = current.Elevation - sink;
+            int originalElevation = current.Terrain.Elevation;
+            int newElevation = current.Terrain.Elevation - sink;
             if(newElevation < elevationMinimum)
             {
                 continue;
             }
-            current.Elevation = newElevation;
+            current.Terrain.Elevation = newElevation;
             if (originalElevation >= waterLevel &&
                 newElevation < waterLevel)
             {
@@ -382,7 +382,7 @@ public class HexMapGenerator : MonoBehaviour {
             HexCell cell = grid.GetCell(i);
             float temperature = DetermineTemperature(cell);
             float moisture = climate[i].moisture;
-            if (!cell.IsUnderwater)
+            if (!cell.Terrain.IsUnderwater)
             {
                 int t = 0;
                 for(; t < temperatureBands.Length; t++)
@@ -403,11 +403,11 @@ public class HexMapGenerator : MonoBehaviour {
                 Biome cellBiome = biomes[t * 4 + m];
                 if(cellBiome.terrain == 0)
                 {
-                    if(cell.Elevation >= rockDesertElevation)
+                    if(cell.Terrain.Elevation >= rockDesertElevation)
                     {
                         cellBiome.terrain = 3;
                     }
-                } else if (cell.Elevation == elevationMaximum) {
+                } else if (cell.Terrain.Elevation == elevationMaximum) {
                     cellBiome.terrain = 4;
                 }
 
@@ -415,17 +415,17 @@ public class HexMapGenerator : MonoBehaviour {
                 {
                     cellBiome.plant = 0;
                 }
-                else if (cellBiome.plant < 3 && cell.HasRiver)
+                else if (cellBiome.plant < 3 && cell.Terrain.HasRiver)
                 {
                     cellBiome.plant += 1;
                 }
 
-                cell.TerrainTypeIndex = cellBiome.terrain;
+                cell.Terrain.TerrainTypeIndex = cellBiome.terrain;
                 cell.PlantLevel = cellBiome.plant;
             } else
             {
                 int terrain;
-                if (cell.Elevation == waterLevel - 1)
+                if (cell.Terrain.Elevation == waterLevel - 1)
                 {
                     int cliffs = 0, slopes = 0;
                     for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
@@ -435,7 +435,7 @@ public class HexMapGenerator : MonoBehaviour {
                         {
                             continue;
                         }
-                        int delta = neighbor.Elevation - cell.WaterLevel;
+                        int delta = neighbor.Terrain.Elevation - cell.Terrain.WaterLevel;
                         if(delta == 0)
                         {
                             slopes += 1;
@@ -461,10 +461,10 @@ public class HexMapGenerator : MonoBehaviour {
                     {
                         terrain = 1;
                     }
-                } else if (cell.Elevation >= waterLevel)
+                } else if (cell.Terrain.Elevation >= waterLevel)
                 {
                     terrain = 1;
-                } else if (cell.Elevation < 0)
+                } else if (cell.Terrain.Elevation < 0)
                 {
                     terrain = 3;
                 } else
@@ -475,7 +475,7 @@ public class HexMapGenerator : MonoBehaviour {
                 {
                     terrain = 2;
                 }
-                cell.TerrainTypeIndex = terrain;
+                cell.Terrain.TerrainTypeIndex = terrain;
             }
         }
     }
@@ -499,8 +499,8 @@ public class HexMapGenerator : MonoBehaviour {
             HexCell cell = erodibleCells[index];
             HexCell targetCell = GetErosionTarget(cell);
 
-            cell.Elevation -= 1;
-            targetCell.Elevation += 1;
+            cell.Terrain.Elevation -= 1;
+            targetCell.Terrain.Elevation += 1;
 
             if (!IsErodible(cell))
             {
@@ -511,7 +511,7 @@ public class HexMapGenerator : MonoBehaviour {
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
             {
                 HexCell neighbor = cell.GetNeighbor(d);
-                if(neighbor && neighbor.Elevation == cell.Elevation + 2 
+                if(neighbor && neighbor.Terrain.Elevation == cell.Terrain.Elevation + 2 
                     && !erodibleCells.Contains(neighbor))
                 {
                     erodibleCells.Add(neighbor);
@@ -527,7 +527,7 @@ public class HexMapGenerator : MonoBehaviour {
             {
                 HexCell neighbor = targetCell.GetNeighbor(d);
                 if (neighbor && neighbor != cell
-                    && neighbor.Elevation == targetCell.Elevation + 1 
+                    && neighbor.Terrain.Elevation == targetCell.Terrain.Elevation + 1 
                     && !IsErodible(neighbor))
                 {
                     erodibleCells.Remove(neighbor);
@@ -540,11 +540,11 @@ public class HexMapGenerator : MonoBehaviour {
 
     bool IsErodible (HexCell cell)
     {
-        int erodibleElevation = cell.Elevation - 2;
+        int erodibleElevation = cell.Terrain.Elevation - 2;
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             HexCell neighbor = cell.GetNeighbor(d);
-            if(neighbor && neighbor.Elevation <= erodibleElevation)
+            if(neighbor && neighbor.Terrain.Elevation <= erodibleElevation)
             {
                 return true;
             }
@@ -556,11 +556,11 @@ public class HexMapGenerator : MonoBehaviour {
     {
         List<HexCell> candidates = ListPool<HexCell>.Get();
 
-        int erodibleElevation = cell.Elevation - 2;
+        int erodibleElevation = cell.Terrain.Elevation - 2;
         for(HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             HexCell neighbor = cell.GetNeighbor(d);
-            if(neighbor && neighbor.Elevation <= erodibleElevation)
+            if(neighbor && neighbor.Terrain.Elevation <= erodibleElevation)
             {
                 candidates.Add(neighbor);
             }
@@ -599,7 +599,7 @@ public class HexMapGenerator : MonoBehaviour {
         HexCell cell = grid.GetCell(cellIndex);
         ClimateData cellClimate = climate[cellIndex];
 
-        if(cell.IsUnderwater)
+        if(cell.Terrain.IsUnderwater)
         {
             cellClimate.moisture = 1f;
             cellClimate.clouds += evaporationFactor;
@@ -676,13 +676,13 @@ public class HexMapGenerator : MonoBehaviour {
         for(int i = 0; i < cellCount; i++)
         {
             HexCell cell = grid.GetCell(i);
-            if(cell.IsUnderwater)
+            if(cell.Terrain.IsUnderwater)
             {
                 continue;
             }
             ClimateData data = climate[i];
 
-            float weight = data.moisture * (cell.Elevation - waterLevel) /
+            float weight = data.moisture * (cell.Terrain.Elevation - waterLevel) /
                 (elevationMaximum - waterLevel);
             if (weight > 0.75f)
             {
@@ -711,13 +711,13 @@ public class HexMapGenerator : MonoBehaviour {
             riverOrigins[index] = riverOrigins[lastIndex];
             riverOrigins.RemoveAt(lastIndex);
 
-            if(!origin.HasRiver)
+            if(!origin.Terrain.HasRiver)
             {
                 bool isValidOrigin = true;
                 for(HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
                     HexCell neighbor = origin.GetNeighbor(d);
-                    if(neighbor && (neighbor.HasRiver || neighbor.IsUnderwater))
+                    if(neighbor && (neighbor.Terrain.HasRiver || neighbor.Terrain.IsUnderwater))
                     {
                         isValidOrigin = false;
                         break;
@@ -747,7 +747,7 @@ public class HexMapGenerator : MonoBehaviour {
         int length = 1;
         HexCell cell = origin;
         HexDirection direction = HexDirection.NE;
-        while (!cell.IsUnderwater)
+        while (!cell.Terrain.IsUnderwater)
         {
             int minNeighborElevation = int.MaxValue;
             flowDirections.Clear();
@@ -759,23 +759,23 @@ public class HexMapGenerator : MonoBehaviour {
                     continue;
                 }
 
-                if(neighbor.Elevation < minNeighborElevation)
+                if(neighbor.Terrain.Elevation < minNeighborElevation)
                 {
-                    minNeighborElevation = neighbor.Elevation;
+                    minNeighborElevation = neighbor.Terrain.Elevation;
                 }
 
-                if(neighbor == origin || neighbor.HasIncomingRiver)
+                if(neighbor == origin || neighbor.Terrain.HasIncomingRiver)
                 {
                     continue;
                 }
 
-                int delta = neighbor.Elevation - cell.Elevation;
+                int delta = neighbor.Terrain.Elevation - cell.Terrain.Elevation;
                 if(delta > 0)
                 {
                     continue;
                 }
 
-                if(neighbor.HasOutgoingRiver)
+                if(neighbor.Terrain.HasOutgoingRiver)
                 {
                     cell.SetOutgoingRiver(d);
                     return length;
@@ -802,12 +802,12 @@ public class HexMapGenerator : MonoBehaviour {
                     return 0;
                 }
 
-                if (minNeighborElevation >= cell.Elevation)
+                if (minNeighborElevation >= cell.Terrain.Elevation)
                 {
-                    cell.WaterLevel = minNeighborElevation;
-                    if(minNeighborElevation == cell.Elevation)
+                    cell.Terrain.WaterLevel = minNeighborElevation;
+                    if(minNeighborElevation == cell.Terrain.Elevation)
                     {
-                        cell.Elevation = minNeighborElevation - 1;
+                        cell.Terrain.Elevation = minNeighborElevation - 1;
                     }
                 }
                 break;
@@ -817,11 +817,11 @@ public class HexMapGenerator : MonoBehaviour {
             cell.SetOutgoingRiver(direction);
             length += 1;
 
-            if(minNeighborElevation >= cell.Elevation && 
+            if(minNeighborElevation >= cell.Terrain.Elevation && 
                 Random.value < extraLakeProbability)
             {
-                cell.WaterLevel = cell.Elevation;
-                cell.Elevation -= 1;
+                cell.Terrain.WaterLevel = cell.Terrain.Elevation;
+                cell.Terrain.Elevation -= 1;
             }
             cell = cell.GetNeighbor(direction);
         }
