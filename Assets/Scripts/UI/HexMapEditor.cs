@@ -125,8 +125,7 @@ public class HexMapEditor : MonoBehaviour {
 	}
 
 	void Update () {
-        if (!EventSystem.current.IsPointerOverGameObject()
-        )
+        if (!EventSystem.current.IsPointerOverGameObject())
         {
             if (Input.GetMouseButton(0))
             {
@@ -147,7 +146,6 @@ public class HexMapEditor : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Nulling Previous cell");
             previousCell = null;
         }
 	}
@@ -229,13 +227,13 @@ public class HexMapEditor : MonoBehaviour {
 	void EditCell (HexCell cell) {
 		if (cell) {
 			if (activeTerrainTypeIndex >= 0) {
-				cell.TerrainTypeIndex = activeTerrainTypeIndex;
+				cell.Terrain.TerrainTypeIndex = activeTerrainTypeIndex;
 			}
 			if (applyElevation) {
-				cell.Elevation = activeElevation;
+				cell.Terrain.Elevation = activeElevation;
 			}
 			if (applyWaterLevel) {
-				cell.WaterLevel = activeWaterLevel;
+				cell.Terrain.WaterLevel = activeWaterLevel;
 			}
 			if (applySpecialIndex) {
 				cell.SpecialIndex = activeSpecialIndex;

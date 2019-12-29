@@ -50,7 +50,7 @@ public class HexCellShaderData : MonoBehaviour {
 
     public void RefreshTerrain (HexCell cell)
     {
-        cellTextureData[cell.Index].a = (byte)cell.TerrainTypeIndex;
+        cellTextureData[cell.Index].a = (byte)cell.Terrain.TerrainTypeIndex;
         enabled = true;
     }
 
