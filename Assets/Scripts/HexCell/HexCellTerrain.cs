@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.IO;
-
-public class Terrain
+﻿public class Terrain
 {
 	int terrainTypeIndex;
 
@@ -16,6 +12,7 @@ public class Terrain
 
     private HexCellShaderData ShaderData;
     private HexCell cell;
+    private RiverTerrain riverTerrain;
 
     public Terrain(HexCellShaderData ShaderData,
                    HexCell cell)
@@ -23,7 +20,10 @@ public class Terrain
         this.ShaderData = ShaderData;
         this.cell = cell;
         this.roads = new bool[6];
+        this.riverTerrain = new RiverTerrain(cell, this);
     }
+
+	public RiverTerrain RiverTerrain { get { return riverTerrain; } }
 
 	public int TerrainTypeIndex
 	{
@@ -60,11 +60,11 @@ public class Terrain
 				ShaderData.ViewElevationChanged();
 			}
 			cell.RefreshPosition();
-			ValidateRivers();
+			riverTerrain.ValidateRivers();
 
 			for (int i = 0; i < roads.Length; i++)
 			{
-				if (roads[i] && cell.GetElevationDifference((HexDirection)i) > 1)
+				if (roads[i] && GetElevationDifference((HexDirection)i) > 1)
 				{
 					SetRoad(i, false);
 				}
@@ -101,7 +101,7 @@ public class Terrain
 			{
 				ShaderData.ViewElevationChanged();
 			}
-			ValidateRivers();
+			riverTerrain.ValidateRivers();
 			cell.Refresh();
 		}
 	}
@@ -111,55 +111,6 @@ public class Terrain
 		get
 		{
 			return waterLevel > elevation;
-		}
-	}
-
-	public bool HasIncomingRiver
-	{
-		get
-		{
-			return hasIncomingRiver;
-		}
-		set
-		{
-			hasIncomingRiver = value;
-		}
-
-	}
-
-	public bool HasOutgoingRiver
-	{
-		get
-		{
-			return hasOutgoingRiver;
-		}
-		set
-        {
-			hasOutgoingRiver = value;
-        }
-	}
-
-	public bool HasRiver
-	{
-		get
-		{
-			return hasIncomingRiver || hasOutgoingRiver;
-		}
-	}
-
-	public bool HasRiverBeginOrEnd
-	{
-		get
-		{
-			return hasIncomingRiver != hasOutgoingRiver;
-		}
-	}
-
-	public HexDirection RiverBeginOrEndDirection
-	{
-		get
-		{
-			return hasIncomingRiver ? incomingRiver : outgoingRiver;
 		}
 	}
 
@@ -175,51 +126,6 @@ public class Terrain
 				}
 			}
 			return false;
-		}
-	}
-
-	public HexDirection IncomingRiver
-	{
-		get
-		{
-			return incomingRiver;
-		}
-		set
-        {
-			incomingRiver = value;
-        }
-	}
-
-	public HexDirection OutgoingRiver
-	{
-		get
-		{
-			return outgoingRiver;
-		}
-		set
-		{
-			outgoingRiver = value;
-		}
-
-	}
-
-	public float StreamBedY
-	{
-		get
-		{
-			return
-				(elevation + HexMetrics.streamBedElevationOffset) *
-				HexMetrics.elevationStep;
-		}
-	}
-
-	public float RiverSurfaceY
-	{
-		get
-		{
-			return
-				(elevation + HexMetrics.waterElevationOffset) *
-				HexMetrics.elevationStep;
 		}
 	}
 
@@ -251,22 +157,32 @@ public class Terrain
         get { return roads.Length; }
     }
 
-    void ValidateRivers()
-    {
-        if (
-            HasOutgoingRiver &&
-            !cell.IsValidRiverDestination(cell.GetNeighbor(OutgoingRiver))
-        )
-        {
-            cell.RemoveOutgoingRiver();
-        }
+	public void AddRoad(HexDirection direction)
+	{
+		if (
+			!HasRoadThroughEdge(direction) && !riverTerrain.HasRiverThroughEdge(direction) &&
+			!cell.IsSpecial && !cell.GetNeighbor(direction).IsSpecial &&
+			GetElevationDifference(direction) <= 1
+		)
+		{
+			SetRoad((int)direction, true);
+		}
+	}
 
-        if (
-            HasIncomingRiver &&
-            !cell.GetNeighbor(IncomingRiver).IsValidRiverDestination(cell)
-        )
-        {
-            cell.RemoveIncomingRiver();
-        }
-    }
+	public void RemoveRoads()
+	{
+		for (int i = 0; i < roads.Length; i++)
+		{
+			if (HasRoadThroughEdge((HexDirection)i))
+			{
+				SetRoad(i, false);
+			}
+		}
+	}
+
+	public int GetElevationDifference(HexDirection direction)
+	{
+		int difference = Elevation - cell.GetNeighbor(direction).Terrain.Elevation;
+		return difference >= 0 ? difference : -difference;
+	}
 }

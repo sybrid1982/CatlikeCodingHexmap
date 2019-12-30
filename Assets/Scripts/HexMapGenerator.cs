@@ -415,7 +415,7 @@ public class HexMapGenerator : MonoBehaviour {
                 {
                     cellBiome.plant = 0;
                 }
-                else if (cellBiome.plant < 3 && cell.Terrain.HasRiver)
+                else if (cellBiome.plant < 3 && cell.Terrain.RiverTerrain.HasRiver)
                 {
                     cellBiome.plant += 1;
                 }
@@ -711,13 +711,13 @@ public class HexMapGenerator : MonoBehaviour {
             riverOrigins[index] = riverOrigins[lastIndex];
             riverOrigins.RemoveAt(lastIndex);
 
-            if(!origin.Terrain.HasRiver)
+            if(!origin.Terrain.RiverTerrain.HasRiver)
             {
                 bool isValidOrigin = true;
                 for(HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
                 {
                     HexCell neighbor = origin.GetNeighbor(d);
-                    if(neighbor && (neighbor.Terrain.HasRiver || neighbor.Terrain.IsUnderwater))
+                    if(neighbor && (neighbor.Terrain.RiverTerrain.HasRiver || neighbor.Terrain.IsUnderwater))
                     {
                         isValidOrigin = false;
                         break;
@@ -764,7 +764,7 @@ public class HexMapGenerator : MonoBehaviour {
                     minNeighborElevation = neighbor.Terrain.Elevation;
                 }
 
-                if(neighbor == origin || neighbor.Terrain.HasIncomingRiver)
+                if(neighbor == origin || neighbor.Terrain.RiverTerrain.HasIncomingRiver)
                 {
                     continue;
                 }
@@ -775,9 +775,9 @@ public class HexMapGenerator : MonoBehaviour {
                     continue;
                 }
 
-                if(neighbor.Terrain.HasOutgoingRiver)
+                if(neighbor.Terrain.RiverTerrain.HasOutgoingRiver)
                 {
-                    cell.SetOutgoingRiver(d);
+                    cell.Terrain.RiverTerrain.SetOutgoingRiver(d);
                     return length;
                 }
 
@@ -814,7 +814,7 @@ public class HexMapGenerator : MonoBehaviour {
             }
 
             direction = flowDirections[Random.Range(0, flowDirections.Count)];
-            cell.SetOutgoingRiver(direction);
+            cell.Terrain.RiverTerrain.SetOutgoingRiver(direction);
             length += 1;
 
             if(minNeighborElevation >= cell.Terrain.Elevation && 

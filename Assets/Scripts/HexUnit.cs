@@ -104,7 +104,7 @@ public class HexUnit : MonoBehaviour {
             return -1;
         }
         int moveCost;
-        if (fromCell.HasRoadThroughEdge(direction))
+        if (fromCell.Terrain.HasRoadThroughEdge(direction))
         {
             moveCost = HexPathMetrics.roadCost;
         }

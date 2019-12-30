@@ -248,10 +248,10 @@ public class HexMapEditor : MonoBehaviour {
 				cell.PlantLevel = activePlantLevel;
 			}
 			if (riverMode == OptionalToggle.No) {
-				cell.RemoveRiver();
+				cell.Terrain.RiverTerrain.RemoveRiver();
 			}
 			if (roadMode == OptionalToggle.No) {
-				cell.RemoveRoads();
+				cell.Terrain.RemoveRoads();
 			}
 			if (walledMode != OptionalToggle.Ignore) {
 				cell.Walled = walledMode == OptionalToggle.Yes;
@@ -260,10 +260,10 @@ public class HexMapEditor : MonoBehaviour {
 				HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
 				if (otherCell) {
 					if (riverMode == OptionalToggle.Yes) {
-						otherCell.SetOutgoingRiver(dragDirection);
+						otherCell.Terrain.RiverTerrain.SetOutgoingRiver(dragDirection);
 					}
 					if (roadMode == OptionalToggle.Yes) {
-						otherCell.AddRoad(dragDirection);
+						otherCell.Terrain.AddRoad(dragDirection);
 					}
 				}
 			}
